@@ -105,7 +105,11 @@ public class HazelcastClusterManager implements ExtendedClusterManager, Membersh
         if (customHazelcastCluster) {
           nodeID = hazelcast.getLocalEndpoint().getUuid();
           membershipListenerId = hazelcast.getCluster().addMembershipListener(this);
-          clientListenerId = hazelcast.getClientService().addClientListener(this);
+          try {
+            clientListenerId = hazelcast.getClientService().addClientListener(this);
+          } catch (UnsupportedOperationException ignore){
+            clientListenerId = null; // Client service not avaiable - this is a client instance
+          }
           fut.complete();
           return;
         }
@@ -119,7 +123,11 @@ public class HazelcastClusterManager implements ExtendedClusterManager, Membersh
         hazelcast = Hazelcast.newHazelcastInstance(conf);
         nodeID = hazelcast.getLocalEndpoint().getUuid();
         membershipListenerId = hazelcast.getCluster().addMembershipListener(this);
-        clientListenerId = hazelcast.getClientService().addClientListener(this);
+        try {
+          clientListenerId = hazelcast.getClientService().addClientListener(this);
+        } catch (UnsupportedOperationException ignore){
+          clientListenerId = null; // Client service not avaiable - this is a client instance
+        }
         fut.complete();
       }
     }, resultHandler);
@@ -209,10 +217,15 @@ public class HazelcastClusterManager implements ExtendedClusterManager, Membersh
           if (!left) {
             log.warn("No membership listener");
           }
-          boolean clientLeft = hazelcast.getClientService().removeClientListener(clientListenerId);
-          if (!clientLeft) {
-            log.warn("No client listener");
+          try {
+            boolean clientLeft = hazelcast.getClientService().removeClientListener(clientListenerId);
+            if (!clientLeft) {
+              log.warn("No client listener");
+            }
+          } catch (UnsupportedOperationException ignore){
+            // Client service not avaiable - this is a client instance
           }
+          
           // Do not shutdown the cluster if we are not the owner.
           while (! customHazelcastCluster  && hazelcast.getLifecycleService().isRunning()) {
             try {
