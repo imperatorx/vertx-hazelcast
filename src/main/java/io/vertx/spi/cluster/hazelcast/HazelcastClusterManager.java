@@ -62,7 +62,7 @@ public class HazelcastClusterManager implements ExtendedClusterManager, Membersh
   private HazelcastInstance hazelcast;
   private String nodeID;
   private String membershipListenerId;
-	private String clientListenerId;
+  private String clientListenerId;
   private boolean customHazelcastCluster;
 
   private NodeListener nodeListener;
@@ -105,7 +105,7 @@ public class HazelcastClusterManager implements ExtendedClusterManager, Membersh
         if (customHazelcastCluster) {
           nodeID = hazelcast.getLocalEndpoint().getUuid();
           membershipListenerId = hazelcast.getCluster().addMembershipListener(this);
-					clientListenerId = hazelcast.getClientService().addClientListener(this);
+          clientListenerId = hazelcast.getClientService().addClientListener(this);
           fut.complete();
           return;
         }
@@ -119,7 +119,7 @@ public class HazelcastClusterManager implements ExtendedClusterManager, Membersh
         hazelcast = Hazelcast.newHazelcastInstance(conf);
         nodeID = hazelcast.getLocalEndpoint().getUuid();
         membershipListenerId = hazelcast.getCluster().addMembershipListener(this);
-				clientListenerId = hazelcast.getClientService().addClientListener(this);
+        clientListenerId = hazelcast.getClientService().addClientListener(this);
         fut.complete();
       }
     }, resultHandler);
@@ -209,8 +209,8 @@ public class HazelcastClusterManager implements ExtendedClusterManager, Membersh
           if (!left) {
             log.warn("No membership listener");
           }
-					boolean clientLeft = hazelcast.getClientService().removeClientListener(clientListenerId);
-					if (!clientLeft) {
+          boolean clientLeft = hazelcast.getClientService().removeClientListener(clientListenerId);
+          if (!clientLeft) {
             log.warn("No client listener");
           }
           // Do not shutdown the cluster if we are not the owner.
@@ -261,9 +261,9 @@ public class HazelcastClusterManager implements ExtendedClusterManager, Membersh
     }
   }
 
-	@Override
-	public synchronized void clientConnected(Client client) {
-		if (!active) {
+  @Override
+  public synchronized void clientConnected(Client client) {
+    if (!active) {
       return;
     }
     try {
@@ -273,11 +273,11 @@ public class HazelcastClusterManager implements ExtendedClusterManager, Membersh
     } catch (Throwable t) {
       log.error("Failed to handle clientConnected", t);
     }
-	}
+  }
 
-	@Override
-	public synchronized void clientDisconnected(Client client) {
-		if (!active) {
+  @Override
+  public synchronized void clientDisconnected(Client client) {
+    if (!active) {
       return;
     }
     try {
@@ -287,7 +287,7 @@ public class HazelcastClusterManager implements ExtendedClusterManager, Membersh
     } catch (Throwable t) {
       log.error("Failed to handle clientDisconnected", t);
     }
-	}
+  }
 		
   @Override
   public boolean isActive() {
